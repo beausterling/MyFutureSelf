@@ -61,9 +61,6 @@ function InitialLayout() {
   const segments = useSegments();
   const router = useRouter();
 
-  // Framework ready hook must be called unconditionally
-  useFrameworkReady();
-
   useEffect(() => {
     if (!isLoaded) return;
 
