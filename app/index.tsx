@@ -41,11 +41,8 @@ export default function WelcomeScreen() {
     loginOpacity.value = withDelay(1200, withSpring(1, { damping: 20 }));
   }, []);
 
-  useEffect(() => {
-    if (isSignedIn) {
-      router.replace('/(tabs)');
-    }
-  }, [isSignedIn]);
+  // Removed the problematic useEffect that was causing the error
+  // The InitialLayout component in app/_layout.tsx should handle auth-based navigation
 
   const animatedTextStyle = useAnimatedStyle(() => ({
     opacity: textOpacity.value,
