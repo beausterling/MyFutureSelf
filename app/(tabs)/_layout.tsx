@@ -1,10 +1,25 @@
-import React from 'react';
-import { Tabs } from 'expo-router';
+import React, { useEffect } from 'react';
+import { Tabs, useRouter } from 'expo-router';
 import { StyleSheet } from 'react-native';
 import { CalendarCheck, Chrome as Home, ChartBar as BarChart, Settings, User } from 'lucide-react-native';
 import { BlurView } from 'expo-blur';
+import { useAuth } from '@clerk/clerk-expo';
 
 export default function TabLayout() {
+  const { isLoaded, isSignedIn } = useAuth();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (!isLoaded) return;
+    if (!isSignedIn) {
+      router.replace('/');
+    }
+  }, [isLoaded, isSignedIn]);
+
+  if (!isLoaded || !isSignedIn) {
+    return null;
+  }
+
   return (
     <Tabs
       screenOptions={{
