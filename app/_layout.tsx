@@ -10,10 +10,13 @@ import {
   Inter_700Bold 
 } from '@expo-google-fonts/inter';
 import { SplashScreen } from 'expo-router';
-import { ClerkProvider, useAuth } from '@clerk/clerk-expo';
 import Constants from 'expo-constants';
 import * as SecureStore from 'expo-secure-store';
 import { useFrameworkReady } from '@/hooks/useFrameworkReady';
+
+// Import appropriate Clerk provider based on platform
+import { ClerkProvider as ClerkExpoProvider, useAuth } from '@clerk/clerk-expo';
+import { ClerkProvider as ClerkWebProvider } from '@clerk/clerk-react';
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
@@ -116,19 +119,32 @@ export default function RootLayout() {
   }
 
   const publishableKey = process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY;
+  const frontendApi = process.env.EXPO_PUBLIC_CLERK_FRONTEND_API;
   
   if (!publishableKey) {
     throw new Error("Missing Clerk publishable key");
   }
 
+  if (Platform.OS === 'web') {
+    if (!frontendApi) {
+      throw new Error("Missing Clerk frontend API");
+    }
+
+    return (
+      <ClerkWebProvider frontendApi={frontendApi} publishableKey={publishableKey}>
+        <InitialLayout />
+        <StatusBar style="light" />
+      </ClerkWebProvider>
+    );
+  }
+
   return (
-    <ClerkProvider
+    <ClerkExpoProvider
       publishableKey={publishableKey}
       tokenCache={tokenCache}
-      isNative={Platform.OS !== 'web'}
     >
       <InitialLayout />
       <StatusBar style="light" />
-    </ClerkProvider>
+    </ClerkExpoProvider>
   );
 }
