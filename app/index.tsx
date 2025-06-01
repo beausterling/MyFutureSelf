@@ -24,6 +24,7 @@ export default function WelcomeScreen() {
   const buttonOpacity = useSharedValue(0);
   const loginOpacity = useSharedValue(0);
 
+  // Framework ready hook must be called unconditionally before any other hooks
   useFrameworkReady();
 
   const [fontsLoaded] = useFonts({
@@ -33,11 +34,15 @@ export default function WelcomeScreen() {
   });
 
   useEffect(() => {
-    // Animate elements in sequence
-    textOpacity.value = withDelay(300, withSpring(1, { damping: 20 }));
-    subTextOpacity.value = withDelay(600, withSpring(1, { damping: 20 }));
-    buttonOpacity.value = withDelay(900, withSpring(1, { damping: 20 }));
-    loginOpacity.value = withDelay(1200, withSpring(1, { damping: 20 }));
+    // Ensure animations only start after component mount
+    const timeout = setTimeout(() => {
+      textOpacity.value = withDelay(300, withSpring(1, { damping: 20 }));
+      subTextOpacity.value = withDelay(600, withSpring(1, { damping: 20 }));
+      buttonOpacity.value = withDelay(900, withSpring(1, { damping: 20 }));
+      loginOpacity.value = withDelay(1200, withSpring(1, { damping: 20 }));
+    }, 0);
+
+    return () => clearTimeout(timeout);
   }, []);
 
   // Redirect to tabs if already signed in

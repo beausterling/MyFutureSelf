@@ -74,14 +74,15 @@ function InitialLayout() {
 }
 
 export default function RootLayout() {
-  useFrameworkReady();
-
   const [fontsLoaded, fontError] = useFonts({
     Inter_400Regular,
     Inter_500Medium,
     Inter_600SemiBold,
     Inter_700Bold,
   });
+
+  // Framework ready hook must be called unconditionally
+  useFrameworkReady();
 
   useEffect(() => {
     if (fontsLoaded || fontError) {
