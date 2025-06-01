@@ -11,9 +11,9 @@ const goals = [
   { id: 1, title: 'Exercise', icon: Dumbbell, color: '#F97316' },
   { id: 2, title: 'Mental Fitness', icon: Brain, color: '#8B5CF6' },
   { id: 3, title: 'Finances', icon: Wallet, color: '#10B981' },
-  { id: 4, title: 'Project', icon: Briefcase, color: '#1EBEA5' },
+  { id: 4, title: 'Relationships', icon: Heart, color: '#EF4444' },
   { id: 5, title: 'Learning', icon: Book, color: '#EC4899' },
-  { id: 6, title: 'Relationships', icon: Heart, color: '#EF4444' },
+  { id: 6, title: 'Project', icon: Briefcase, color: '#1EBEA5' },  
   { id: 7, title: 'Nutrition', icon: Salad, color: '#22C55E' },
   { id: 8, title: 'Sleep', icon: Moon, color: '#3B82F6' },
 ];
@@ -47,7 +47,7 @@ export default function PickGoalScreen() {
         <Animated.View entering={FadeInDown.delay(300).duration(600)} style={styles.content}>
           <Text style={styles.title}>What do you want to achieve?</Text>
           <Text style={styles.subtitle}>
-            Choose a goal you want your future self to hold you accountable for
+            Choose a goal category you want your future self to hold you accountable for
           </Text>
 
           <View style={styles.goalsGrid}>
