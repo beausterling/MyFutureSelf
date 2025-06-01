@@ -125,6 +125,7 @@ export default function RootLayout() {
     <ClerkProvider
       publishableKey={publishableKey}
       tokenCache={tokenCache}
+      isNative={Platform.OS !== 'web'}
     >
       <InitialLayout />
       <StatusBar style="light" />
