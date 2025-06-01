@@ -18,22 +18,32 @@ import { useFrameworkReady } from '@/hooks/useFrameworkReady';
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
 
-const tokenCache = {
-  async getToken(key: string) {
-    try {
-      return SecureStore.getItemAsync(key);
-    } catch (err) {
+const tokenCache = Platform.select({
+  web: {
+    async getToken() {
       return null;
-    }
-  },
-  async saveToken(key: string, value: string) {
-    try {
-      return SecureStore.setItemAsync(key, value);
-    } catch (err) {
+    },
+    async saveToken() {
       return;
-    }
+    },
   },
-};
+  default: {
+    async getToken(key: string) {
+      try {
+        return SecureStore.getItemAsync(key);
+      } catch (err) {
+        return null;
+      }
+    },
+    async saveToken(key: string, value: string) {
+      try {
+        return SecureStore.setItemAsync(key, value);
+      } catch (err) {
+        return;
+      }
+    },
+  },
+});
 
 function InitialLayout() {
   const { isLoaded, isSignedIn } = useAuth();
