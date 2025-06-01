@@ -45,16 +45,17 @@ function InitialLayout() {
 
     const inTabsGroup = segments[0] === '(tabs)';
     const inOnboarding = segments[0] === 'onboarding';
+    const inAuthGroup = segments[0] === 'sign-in' || segments[0] === 'sign-up';
 
     if (isSignedIn) {
       // If the user is signed in but in the onboarding flow, let them complete it
-      if (!inOnboarding) {
+      if (!inOnboarding && !inTabsGroup) {
         // Otherwise, send them to the main app
         router.replace('/(tabs)');
       }
     } else {
       // If the user isn't signed in, send them to the welcome screen
-      if (inTabsGroup) {
+      if (inTabsGroup || inOnboarding) {
         router.replace('/');
       }
     }
@@ -63,6 +64,8 @@ function InitialLayout() {
   return (
     <Stack screenOptions={{ headerShown: false, animation: 'slide_from_right' }}>
       <Stack.Screen name="index" options={{ title: 'Welcome' }} />
+      <Stack.Screen name="sign-in" options={{ title: 'Sign In' }} />
+      <Stack.Screen name="sign-up" options={{ title: 'Sign Up' }} />
       <Stack.Screen name="onboarding" options={{ headerShown: false }} />
       <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
       <Stack.Screen name="+not-found" options={{ title: 'Oops!' }} />

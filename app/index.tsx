@@ -4,7 +4,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
 import * as Haptics from 'expo-haptics';
 import { StatusBar } from 'expo-status-bar';
-import { useSignUp, useAuth } from '@clerk/clerk-expo';
+import { useAuth } from '@clerk/clerk-expo';
 import Animated, { 
   useSharedValue, 
   useAnimatedStyle,
@@ -18,7 +18,6 @@ import { useFrameworkReady } from '@/hooks/useFrameworkReady';
 export default function WelcomeScreen() {
   const router = useRouter();
   const { isSignedIn } = useAuth();
-  const { signUp, setActive } = useSignUp();
   const buttonScale = useSharedValue(1);
   const textOpacity = useSharedValue(0);
   const subTextOpacity = useSharedValue(0);
@@ -44,8 +43,12 @@ export default function WelcomeScreen() {
     loginOpacity.value = withDelay(1200, withSpring(1, { damping: 20 }));
   }, []);
 
-  // Removed the problematic useEffect that was causing the error
-  // The InitialLayout component in app/_layout.tsx should handle auth-based navigation
+  // Redirect to tabs if already signed in
+  useEffect(() => {
+    if (isSignedIn) {
+      router.replace('/(tabs)');
+    }
+  }, [isSignedIn, router]);
 
   const animatedTextStyle = useAnimatedStyle(() => ({
     opacity: textOpacity.value,
@@ -69,7 +72,7 @@ export default function WelcomeScreen() {
     opacity: loginOpacity.value,
   }));
 
-  const handlePress = async () => {
+  const handleSignUpPress = () => {
     if (Platform.OS !== 'web') {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     }
@@ -80,28 +83,17 @@ export default function WelcomeScreen() {
       withDelay(100, withSpring(1, { damping: 15, stiffness: 300 }))
     );
     
-    try {
-      // Create a new user with a placeholder email (we'll update this later)
-      const result = await signUp.create({
-        emailAddress: `user-${Date.now()}@example.com`,
-        password: `temp-${Date.now()}`,
-      });
-
-      // Set the newly created user as active
-      await setActive({ session: result.createdSessionId });
-      
-      // Navigate to onboarding
-      router.push('/onboarding/verify-phone');
-    } catch (err) {
-      console.error('Error signing up:', err);
-    }
+    // Navigate to sign up screen
+    router.push('/sign-up');
   };
 
   const handleLoginPress = () => {
     if (Platform.OS !== 'web') {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     }
-    // Navigate to sign in screen (to be implemented)
+    
+    // Navigate to sign in screen
+    router.push('/sign-in');
   };
 
   if (!fontsLoaded) {
@@ -130,7 +122,7 @@ export default function WelcomeScreen() {
           <Animated.View style={[styles.buttonContainer, animatedButtonStyle]}>
             <Pressable 
               style={styles.button} 
-              onPress={handlePress}
+              onPress={handleSignUpPress}
               android_ripple={{ color: 'rgba(255,255,255,0.2)', borderless: false }}
             >
               <Text style={styles.buttonText}>Get Started</Text>
