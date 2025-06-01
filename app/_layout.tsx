@@ -20,11 +20,19 @@ SplashScreen.preventAutoHideAsync();
 
 const tokenCache = Platform.select({
   web: {
-    async getToken() {
-      return null;
+    async getToken(key: string) {
+      try {
+        return localStorage.getItem(key);
+      } catch (err) {
+        return null;
+      }
     },
-    async saveToken() {
-      return;
+    async saveToken(key: string, value: string) {
+      try {
+        localStorage.setItem(key, value);
+      } catch (err) {
+        return;
+      }
     },
   },
   default: {
