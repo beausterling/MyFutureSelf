@@ -1,19 +1,21 @@
 import React, { useState } from 'react';
-import { StyleSheet, Text, View, Pressable, ScrollView } from 'react-native';
+import { StyleSheet, Text, View, ScrollView } from 'react-native';
 import { useRouter } from 'expo-router';
 import * as Haptics from 'expo-haptics';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Animated, { FadeIn, FadeInDown } from 'react-native-reanimated';
-import { ArrowRight, Dumbbell, Briefcase, Book, Brain, Heart, Moon } from 'lucide-react-native';
+import { ArrowRight, Dumbbell, Brain, Wallet, Briefcase, Book, Heart, Salad, Moon } from 'lucide-react-native';
 import ProgressBar from '@/components/ProgressBar';
 
 const goals = [
   { id: 1, title: 'Exercise', icon: Dumbbell, color: '#F97316' },
-  { id: 2, title: 'Work Project', icon: Briefcase, color: '#1EBEA5' },
-  { id: 3, title: 'Reading', icon: Book, color: '#8B5CF6' },
-  { id: 4, title: 'Learning', icon: Brain, color: '#EC4899' },
-  { id: 5, title: 'Self Care', icon: Heart, color: '#EF4444' },
-  { id: 6, title: 'Sleep', icon: Moon, color: '#3B82F6' },
+  { id: 2, title: 'Mental Fitness', icon: Brain, color: '#8B5CF6' },
+  { id: 3, title: 'Finances', icon: Wallet, color: '#10B981' },
+  { id: 4, title: 'Project', icon: Briefcase, color: '#1EBEA5' },
+  { id: 5, title: 'Learning', icon: Book, color: '#EC4899' },
+  { id: 6, title: 'Relationships', icon: Heart, color: '#EF4444' },
+  { id: 7, title: 'Nutrition', icon: Salad, color: '#22C55E' },
+  { id: 8, title: 'Sleep', icon: Moon, color: '#3B82F6' },
 ];
 
 export default function PickGoalScreen() {
