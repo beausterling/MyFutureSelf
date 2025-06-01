@@ -4,7 +4,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
 import * as Haptics from 'expo-haptics';
 import { StatusBar } from 'expo-status-bar';
-import { useAuth } from '@clerk/clerk-expo';
+import { useSignUp, useAuth } from '@clerk/clerk-expo';
 import Animated, { 
   useSharedValue, 
   useAnimatedStyle,
@@ -18,13 +18,13 @@ import { useFrameworkReady } from '@/hooks/useFrameworkReady';
 export default function WelcomeScreen() {
   const router = useRouter();
   const { isSignedIn } = useAuth();
+  const { signUp, setActive } = useSignUp();
   const buttonScale = useSharedValue(1);
   const textOpacity = useSharedValue(0);
   const subTextOpacity = useSharedValue(0);
   const buttonOpacity = useSharedValue(0);
   const loginOpacity = useSharedValue(0);
 
-  // Framework ready hook must be called unconditionally before any other hooks
   useFrameworkReady();
 
   const [fontsLoaded] = useFonts({
@@ -34,23 +34,18 @@ export default function WelcomeScreen() {
   });
 
   useEffect(() => {
-    // Ensure animations only start after component mount
-    const timeout = setTimeout(() => {
-      textOpacity.value = withDelay(300, withSpring(1, { damping: 20 }));
-      subTextOpacity.value = withDelay(600, withSpring(1, { damping: 20 }));
-      buttonOpacity.value = withDelay(900, withSpring(1, { damping: 20 }));
-      loginOpacity.value = withDelay(1200, withSpring(1, { damping: 20 }));
-    }, 100);
-
-    return () => clearTimeout(timeout);
+    // Animate elements in sequence
+    textOpacity.value = withDelay(300, withSpring(1, { damping: 20 }));
+    subTextOpacity.value = withDelay(600, withSpring(1, { damping: 20 }));
+    buttonOpacity.value = withDelay(900, withSpring(1, { damping: 20 }));
+    loginOpacity.value = withDelay(1200, withSpring(1, { damping: 20 }));
   }, []);
 
-  // Redirect to tabs if already signed in
   useEffect(() => {
     if (isSignedIn) {
       router.replace('/(tabs)');
     }
-  }, [isSignedIn, router]);
+  }, [isSignedIn]);
 
   const animatedTextStyle = useAnimatedStyle(() => ({
     opacity: textOpacity.value,
@@ -74,7 +69,7 @@ export default function WelcomeScreen() {
     opacity: loginOpacity.value,
   }));
 
-  const handleSignUpPress = () => {
+  const handlePress = async () => {
     if (Platform.OS !== 'web') {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     }
@@ -85,17 +80,28 @@ export default function WelcomeScreen() {
       withDelay(100, withSpring(1, { damping: 15, stiffness: 300 }))
     );
     
-    // Navigate to sign up screen
-    router.push('/sign-up');
+    try {
+      // Create a new user with a placeholder email (we'll update this later)
+      const result = await signUp.create({
+        emailAddress: `user-${Date.now()}@example.com`,
+        password: `temp-${Date.now()}`,
+      });
+
+      // Set the newly created user as active
+      await setActive({ session: result.createdSessionId });
+      
+      // Navigate to onboarding
+      router.push('/onboarding/verify-phone');
+    } catch (err) {
+      console.error('Error signing up:', err);
+    }
   };
 
   const handleLoginPress = () => {
     if (Platform.OS !== 'web') {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     }
-    
-    // Navigate to sign in screen
-    router.push('/sign-in');
+    // Navigate to sign in screen (to be implemented)
   };
 
   if (!fontsLoaded) {
@@ -124,7 +130,7 @@ export default function WelcomeScreen() {
           <Animated.View style={[styles.buttonContainer, animatedButtonStyle]}>
             <Pressable 
               style={styles.button} 
-              onPress={handleSignUpPress}
+              onPress={handlePress}
               android_ripple={{ color: 'rgba(255,255,255,0.2)', borderless: false }}
             >
               <Text style={styles.buttonText}>Get Started</Text>
