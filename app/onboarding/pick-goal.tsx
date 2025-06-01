@@ -144,7 +144,7 @@ export default function PickGoalScreen() {
           <Text style={styles.subtitle}>
             {showGoals 
               ? 'Choose specific goals for each category or add your own'
-              : 'Choose goal categories you want your future self to hold you accountable for'
+              : 'Choose goal categories you want your future self to hold you accountable for. You can update these later'
             }
           </Text>
 
