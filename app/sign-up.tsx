@@ -7,6 +7,7 @@ import Animated, { FadeIn, FadeInDown } from 'react-native-reanimated';
 import { ArrowRight } from 'lucide-react-native';
 import { useSignUp } from '@clerk/clerk-expo';
 import { useFrameworkReady } from '@/hooks/useFrameworkReady';
+import { syncUserWithSupabase } from '@/lib/auth';
 
 export default function SignUpScreen() {
   const router = useRouter();
@@ -35,7 +36,7 @@ export default function SignUpScreen() {
     }
     
     try {
-      // Create a new user
+      // Create a new user in Clerk
       const result = await signUp.create({
         firstName,
         lastName,
@@ -51,12 +52,20 @@ export default function SignUpScreen() {
 
       // Set the newly created user as active
       await setActive({ session: result.createdSessionId });
+
+      // Sync user data with Supabase
+      await syncUserWithSupabase(
+        result.createdUserId,
+        emailAddress,
+        firstName,
+        lastName
+      );
       
       // Navigate to onboarding
       router.push('/onboarding/verify-phone');
-    } catch (err) {
+    } catch (err: any) {
       console.error('Error signing up:', err);
-      setError('There was an error creating your account. Please try again.');
+      setError(err.message || 'There was an error creating your account. Please try again.');
     } finally {
       setLoading(false);
     }
