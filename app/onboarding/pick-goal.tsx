@@ -1,11 +1,62 @@
 import React, { useState } from 'react';
-import { StyleSheet, Text, View, ScrollView, Pressable, Platform } from 'react-native';
+import { StyleSheet, Text, View, ScrollView, Pressable, Platform, TextInput } from 'react-native';
 import { useRouter } from 'expo-router';
 import * as Haptics from 'expo-haptics';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Animated, { FadeIn, FadeInDown } from 'react-native-reanimated';
-import { ArrowRight, Dumbbell, Brain, Wallet, Briefcase, Book, Heart, Salad, Moon } from 'lucide-react-native';
+import { ArrowRight, Dumbbell, Brain, Wallet, Briefcase, Book, Heart, Salad, Moon, Plus } from 'lucide-react-native';
 import ProgressBar from '@/components/ProgressBar';
+
+const goalOptions = {
+  Exercise: [
+    'Go to the gym 3x per week',
+    'Run 5km weekly',
+    'Daily 30-min workout',
+    'Weekly yoga session',
+  ],
+  'Mental Fitness': [
+    'Daily meditation',
+    'Weekly therapy session',
+    'Journal every morning',
+    'Practice mindfulness',
+  ],
+  Finances: [
+    'Save $500 monthly',
+    'Track daily expenses',
+    'Invest 10% of income',
+    'Create emergency fund',
+  ],
+  Relationships: [
+    'Weekly date night',
+    'Call family weekly',
+    'Monthly friend meetup',
+    'Better work-life balance',
+  ],
+  Learning: [
+    'Read 2 books monthly',
+    'Take online course',
+    'Learn new language',
+    'Practice coding daily',
+  ],
+  Project: [
+    'Complete side project',
+    'Launch MVP',
+    'Write documentation',
+    'Weekly progress update',
+  ],
+  Nutrition: [
+    'Meal prep weekly',
+    'Eat more vegetables',
+    'Reduce sugar intake',
+    'Track macros daily',
+  ],
+  Sleep: [
+    '8 hours sleep daily',
+    'Consistent bedtime',
+    'No screens before bed',
+    'Morning routine',
+  ],
+};
 
 const goals = [
   { id: 1, title: 'Exercise', icon: Dumbbell, color: '#F97316' },
@@ -13,27 +64,69 @@ const goals = [
   { id: 3, title: 'Finances', icon: Wallet, color: '#10B981' },
   { id: 4, title: 'Relationships', icon: Heart, color: '#EF4444' },
   { id: 5, title: 'Learning', icon: Book, color: '#EC4899' },
-  { id: 6, title: 'Project', icon: Briefcase, color: '#1EBEA5' },  
+  { id: 6, title: 'Project', icon: Briefcase, color: '#1EBEA5' },
   { id: 7, title: 'Nutrition', icon: Salad, color: '#22C55E' },
   { id: 8, title: 'Sleep', icon: Moon, color: '#3B82F6' },
 ];
 
 export default function PickGoalScreen() {
   const router = useRouter();
-  const [selectedGoal, setSelectedGoal] = useState<number | null>(null);
+  const [selectedCategories, setSelectedCategories] = useState<Set<number>>(new Set());
+  const [showGoals, setShowGoals] = useState(false);
+  const [selectedGoals, setSelectedGoals] = useState<Record<string, string[]>>({});
+  const [customGoals, setCustomGoals] = useState<Record<string, string[]>>({});
+  const [newGoal, setNewGoal] = useState<Record<string, string>>({});
 
-  const handleGoalSelect = (goalId: number) => {
+  const handleCategorySelect = (goalId: number) => {
     if (Platform.OS !== 'web') {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     }
-    setSelectedGoal(goalId);
+    const newSelected = new Set(selectedCategories);
+    if (newSelected.has(goalId)) {
+      newSelected.delete(goalId);
+      const category = goals.find(g => g.id === goalId)?.title || '';
+      const newSelectedGoals = { ...selectedGoals };
+      delete newSelectedGoals[category];
+      setSelectedGoals(newSelectedGoals);
+    } else {
+      newSelected.add(goalId);
+    }
+    setSelectedCategories(newSelected);
   };
 
   const handleContinue = () => {
     if (Platform.OS !== 'web') {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     }
-    router.push('/onboarding/call-style');
+    if (!showGoals) {
+      setShowGoals(true);
+    } else {
+      router.push('/onboarding/call-style');
+    }
+  };
+
+  const handleGoalSelect = (category: string, goal: string) => {
+    const currentGoals = selectedGoals[category] || [];
+    const newGoals = currentGoals.includes(goal)
+      ? currentGoals.filter(g => g !== goal)
+      : [...currentGoals, goal];
+    setSelectedGoals({ ...selectedGoals, [category]: newGoals });
+  };
+
+  const handleAddCustomGoal = (category: string) => {
+    if (!newGoal[category]?.trim()) return;
+    
+    const currentCustomGoals = customGoals[category] || [];
+    const updatedCustomGoals = [...currentCustomGoals, newGoal[category]];
+    setCustomGoals({ ...customGoals, [category]: updatedCustomGoals });
+    
+    const currentSelectedGoals = selectedGoals[category] || [];
+    setSelectedGoals({ 
+      ...selectedGoals, 
+      [category]: [...currentSelectedGoals, newGoal[category]]
+    });
+    
+    setNewGoal({ ...newGoal, [category]: '' });
   };
 
   return (
@@ -45,35 +138,109 @@ export default function PickGoalScreen() {
 
       <ScrollView style={styles.scrollView}>
         <Animated.View entering={FadeInDown.delay(300).duration(600)} style={styles.content}>
-          <Text style={styles.title}>What do you want to achieve?</Text>
+          <Text style={styles.title}>
+            {showGoals ? 'Set your specific goals' : 'What do you want to achieve?'}
+          </Text>
           <Text style={styles.subtitle}>
-            Choose a goal category you want your future self to hold you accountable for
+            {showGoals 
+              ? 'Choose specific goals for each category or add your own'
+              : 'Choose goal categories you want your future self to hold you accountable for'
+            }
           </Text>
 
-          <View style={styles.goalsGrid}>
-            {goals.map((goal) => (
-              <Pressable
-                key={goal.id}
-                style={[
-                  styles.goalCard,
-                  selectedGoal === goal.id && styles.goalCardSelected,
-                ]}
-                onPress={() => handleGoalSelect(goal.id)}
-              >
-                <View style={[styles.iconContainer, { backgroundColor: `${goal.color}20` }]}>
-                  <goal.icon size={28} color={goal.color} />
-                </View>
-                <Text style={styles.goalTitle}>{goal.title}</Text>
-              </Pressable>
-            ))}
-          </View>
+          {!showGoals ? (
+            <View style={styles.goalsGrid}>
+              {goals.map((goal) => (
+                <Pressable
+                  key={goal.id}
+                  style={[
+                    styles.goalCard,
+                    selectedCategories.has(goal.id) && styles.goalCardSelected,
+                  ]}
+                  onPress={() => handleCategorySelect(goal.id)}
+                >
+                  <View style={[styles.iconContainer, { backgroundColor: `${goal.color}20` }]}>
+                    <goal.icon size={28} color={goal.color} />
+                  </View>
+                  <Text style={styles.goalTitle}>{goal.title}</Text>
+                </Pressable>
+              ))}
+            </View>
+          ) : (
+            <View style={styles.categoriesContainer}>
+              {Array.from(selectedCategories).map((categoryId) => {
+                const category = goals.find(g => g.id === categoryId);
+                if (!category) return null;
+                
+                return (
+                  <View key={category.id} style={styles.categorySection}>
+                    <View style={styles.categoryHeader}>
+                      <View style={[styles.iconContainer, { backgroundColor: `${category.color}20` }]}>
+                        <category.icon size={24} color={category.color} />
+                      </View>
+                      <Text style={styles.categoryTitle}>{category.title}</Text>
+                    </View>
+                    
+                    <View style={styles.goalsList}>
+                      {goalOptions[category.title].map((goal, index) => (
+                        <Pressable
+                          key={index}
+                          style={[
+                            styles.goalOption,
+                            (selectedGoals[category.title] || []).includes(goal) && styles.goalOptionSelected
+                          ]}
+                          onPress={() => handleGoalSelect(category.title, goal)}
+                        >
+                          <Text style={styles.goalOptionText}>{goal}</Text>
+                        </Pressable>
+                      ))}
+                      
+                      {(customGoals[category.title] || []).map((goal, index) => (
+                        <Pressable
+                          key={`custom-${index}`}
+                          style={[
+                            styles.goalOption,
+                            (selectedGoals[category.title] || []).includes(goal) && styles.goalOptionSelected
+                          ]}
+                          onPress={() => handleGoalSelect(category.title, goal)}
+                        >
+                          <Text style={styles.goalOptionText}>{goal}</Text>
+                        </Pressable>
+                      ))}
+                      
+                      <View style={styles.addCustomGoal}>
+                        <TextInput
+                          style={styles.customGoalInput}
+                          placeholder="Add custom goal..."
+                          value={newGoal[category.title] || ''}
+                          onChangeText={(text) => setNewGoal({ ...newGoal, [category.title]: text })}
+                          onSubmitEditing={() => handleAddCustomGoal(category.title)}
+                        />
+                        <Pressable
+                          style={styles.addButton}
+                          onPress={() => handleAddCustomGoal(category.title)}
+                        >
+                          <Plus size={20} color="#1EBEA5" />
+                        </Pressable>
+                      </View>
+                    </View>
+                  </View>
+                );
+              })}
+            </View>
+          )}
 
           <Pressable
-            style={[styles.button, !selectedGoal && styles.buttonDisabled]}
+            style={[
+              styles.button,
+              (!showGoals && selectedCategories.size === 0) && styles.buttonDisabled
+            ]}
             onPress={handleContinue}
-            disabled={!selectedGoal}
+            disabled={!showGoals && selectedCategories.size === 0}
           >
-            <Text style={styles.buttonText}>Next</Text>
+            <Text style={styles.buttonText}>
+              {showGoals ? 'Continue' : 'Next'}
+            </Text>
             <ArrowRight size={20} color="#FFFFFF" style={styles.buttonIcon} />
           </Pressable>
         </Animated.View>
@@ -151,6 +318,70 @@ const styles = StyleSheet.create({
     fontFamily: 'Inter_600SemiBold',
     fontSize: 16,
     color: '#121B2F',
+    textAlign: 'center',
+  },
+  categoriesContainer: {
+    marginBottom: 32,
+  },
+  categorySection: {
+    marginBottom: 24,
+    backgroundColor: '#F9F9F9',
+    borderRadius: 16,
+    padding: 16,
+  },
+  categoryHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  categoryTitle: {
+    fontFamily: 'Inter_600SemiBold',
+    fontSize: 18,
+    color: '#121B2F',
+    marginLeft: 12,
+  },
+  goalsList: {
+    gap: 8,
+  },
+  goalOption: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 12,
+    padding: 12,
+    borderWidth: 1,
+    borderColor: '#E5E5E5',
+  },
+  goalOptionSelected: {
+    backgroundColor: '#F0FFFD',
+    borderColor: '#1EBEA5',
+  },
+  goalOptionText: {
+    fontFamily: 'Inter_400Regular',
+    fontSize: 14,
+    color: '#121B2F',
+  },
+  addCustomGoal: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 8,
+    gap: 8,
+  },
+  customGoalInput: {
+    flex: 1,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 12,
+    padding: 12,
+    borderWidth: 1,
+    borderColor: '#E5E5E5',
+    fontFamily: 'Inter_400Regular',
+    fontSize: 14,
+  },
+  addButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: '#F0FFFD',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   button: {
     backgroundColor: '#1EBEA5',
