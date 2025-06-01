@@ -1,10 +1,10 @@
 import React, { useEffect } from 'react';
-import { StyleSheet, Text, View, Pressable } from 'react-native';
+import { StyleSheet, Text, View, Pressable, Platform } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
 import * as Haptics from 'expo-haptics';
-import { Platform } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
+import { useSignUp, useAuth } from '@clerk/clerk-expo';
 import Animated, { 
   useSharedValue, 
   useAnimatedStyle,
@@ -17,6 +17,8 @@ import { useFrameworkReady } from '@/hooks/useFrameworkReady';
 
 export default function WelcomeScreen() {
   const router = useRouter();
+  const { isSignedIn } = useAuth();
+  const { signUp, setActive } = useSignUp();
   const buttonScale = useSharedValue(1);
   const textOpacity = useSharedValue(0);
   const subTextOpacity = useSharedValue(0);
@@ -38,6 +40,12 @@ export default function WelcomeScreen() {
     buttonOpacity.value = withDelay(900, withSpring(1, { damping: 20 }));
     loginOpacity.value = withDelay(1200, withSpring(1, { damping: 20 }));
   }, []);
+
+  useEffect(() => {
+    if (isSignedIn) {
+      router.replace('/(tabs)');
+    }
+  }, [isSignedIn]);
 
   const animatedTextStyle = useAnimatedStyle(() => ({
     opacity: textOpacity.value,
@@ -61,8 +69,7 @@ export default function WelcomeScreen() {
     opacity: loginOpacity.value,
   }));
 
-  const handlePress = () => {
-    // Trigger haptic feedback on devices that support it
+  const handlePress = async () => {
     if (Platform.OS !== 'web') {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     }
@@ -73,22 +80,32 @@ export default function WelcomeScreen() {
       withDelay(100, withSpring(1, { damping: 15, stiffness: 300 }))
     );
     
-    // Navigate to onboarding after a short delay
-    setTimeout(() => {
+    try {
+      // Create a new user with a placeholder email (we'll update this later)
+      const result = await signUp.create({
+        emailAddress: `user-${Date.now()}@example.com`,
+        password: `temp-${Date.now()}`,
+      });
+
+      // Set the newly created user as active
+      await setActive({ session: result.createdSessionId });
+      
+      // Navigate to onboarding
       router.push('/onboarding/verify-phone');
-    }, 200);
+    } catch (err) {
+      console.error('Error signing up:', err);
+    }
   };
 
   const handleLoginPress = () => {
     if (Platform.OS !== 'web') {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     }
-    // This would navigate to login in a real app
-    // For now, just a stub as per requirements
+    // Navigate to sign in screen (to be implemented)
   };
 
   if (!fontsLoaded) {
-    return null; // Return null while fonts are loading
+    return null;
   }
 
   return (
