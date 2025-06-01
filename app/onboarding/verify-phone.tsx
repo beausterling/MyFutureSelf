@@ -35,7 +35,7 @@ export default function VerifyPhoneScreen() {
         <Animated.View entering={FadeInDown.delay(300).duration(600)} style={styles.content}>
           <Text style={styles.title}>Verify your phone number</Text>
           <Text style={styles.subtitle}>
-            Your future self will call you from this number to keep you accountable
+            Your future self will call you on this number to keep you accountable
           </Text>
           
           <View style={styles.inputContainer}>
