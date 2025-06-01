@@ -11,7 +11,6 @@ import {
 } from '@expo-google-fonts/inter';
 import { SplashScreen } from 'expo-router';
 import { ClerkProvider, useAuth } from '@clerk/clerk-expo';
-import Constants from 'expo-constants';
 import * as SecureStore from 'expo-secure-store';
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
@@ -91,7 +90,7 @@ export default function RootLayout() {
 
   return (
     <ClerkProvider
-      publishableKey={Constants.expoConfig?.extra?.clerkPublishableKey as string}
+      publishableKey={process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY}
       tokenCache={tokenCache}
     >
       <InitialLayout />
