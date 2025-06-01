@@ -1,5 +1,5 @@
 import React from 'react';
-import { StyleSheet, Text, Pressable, ViewStyle, TextStyle, PressableProps, View } from 'react-native';
+import { StyleSheet, Text, Pressable, ViewStyle, TextStyle, PressableProps, View, Platform } from 'react-native';
 import * as Haptics from 'expo-haptics';
 import Animated, { 
   useSharedValue, 
@@ -186,5 +186,3 @@ const styles = StyleSheet.create({
     borderTopColor: 'transparent',
   },
 });
-
-export default Button;
