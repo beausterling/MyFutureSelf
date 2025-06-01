@@ -20,9 +20,6 @@
     "experiments": {
       "typedRoutes": true
     },
-    "primaryColor": "#1EBEA5",
-    "extra": {
-      "clerkPublishableKey": "pk_test_d2lyZWQtYXNwLTY2LmNsZXJrLmFjY291bnRzLmRldi"
-    }
+    "primaryColor": "#1EBEA5"
   }
 }

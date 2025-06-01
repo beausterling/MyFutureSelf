@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react';
 import { Stack, useRouter, useSegments } from 'expo-router';
+import { Platform } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { useFrameworkReady } from '@/hooks/useFrameworkReady';
 import { 
@@ -91,7 +92,7 @@ export default function RootLayout() {
 
   return (
     <ClerkProvider
-      publishableKey={Constants.expoConfig?.extra?.clerkPublishableKey as string}
+      publishableKey={process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY!}
       tokenCache={tokenCache}
     >
       <InitialLayout />
