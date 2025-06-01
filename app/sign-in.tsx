@@ -6,6 +6,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import Animated, { FadeIn, FadeInDown } from 'react-native-reanimated';
 import { ArrowRight } from 'lucide-react-native';
 import { useSignIn } from '@clerk/clerk-expo';
+import { useFrameworkReady } from '@/hooks/useFrameworkReady';
 
 export default function SignInScreen() {
   const router = useRouter();
@@ -15,6 +16,9 @@ export default function SignInScreen() {
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // Framework ready hook must be called unconditionally before any other hooks
+  useFrameworkReady();
 
   const handleSignIn = async () => {
     if (!isLoaded) {

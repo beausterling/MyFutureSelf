@@ -6,6 +6,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import Animated, { FadeIn, FadeInDown } from 'react-native-reanimated';
 import { ArrowRight } from 'lucide-react-native';
 import { useSignUp } from '@clerk/clerk-expo';
+import { useFrameworkReady } from '@/hooks/useFrameworkReady';
 
 export default function SignUpScreen() {
   const router = useRouter();
@@ -17,6 +18,9 @@ export default function SignUpScreen() {
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // Framework ready hook must be called unconditionally before any other hooks
+  useFrameworkReady();
 
   const handleSignUp = async () => {
     if (!isLoaded) {
@@ -31,13 +35,20 @@ export default function SignUpScreen() {
     }
     
     try {
+      // Create a new user
       const result = await signUp.create({
         firstName,
         lastName,
         emailAddress,
         password,
       });
-      
+
+      // Skip email verification for demo purposes
+      // In a real app, you would handle this properly
+      await signUp.prepareEmailAddressVerification({
+        strategy: "email_code"
+      });
+
       // Set the newly created user as active
       await setActive({ session: result.createdSessionId });
       

@@ -40,7 +40,7 @@ export default function WelcomeScreen() {
       subTextOpacity.value = withDelay(600, withSpring(1, { damping: 20 }));
       buttonOpacity.value = withDelay(900, withSpring(1, { damping: 20 }));
       loginOpacity.value = withDelay(1200, withSpring(1, { damping: 20 }));
-    }, 0);
+    }, 100);
 
     return () => clearTimeout(timeout);
   }, []);

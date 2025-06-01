@@ -2,7 +2,6 @@ import React, { useEffect } from 'react';
 import { Stack, useRouter, useSegments } from 'expo-router';
 import { Platform } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
-import { useFrameworkReady } from '@/hooks/useFrameworkReady';
 import { 
   useFonts, 
   Inter_400Regular, 
@@ -14,6 +13,7 @@ import { SplashScreen } from 'expo-router';
 import { ClerkProvider, useAuth } from '@clerk/clerk-expo';
 import Constants from 'expo-constants';
 import * as SecureStore from 'expo-secure-store';
+import { useFrameworkReady } from '@/hooks/useFrameworkReady';
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
@@ -40,6 +40,9 @@ function InitialLayout() {
   const segments = useSegments();
   const router = useRouter();
 
+  // Framework ready hook must be called unconditionally
+  useFrameworkReady();
+
   useEffect(() => {
     if (!isLoaded) return;
 
@@ -49,7 +52,7 @@ function InitialLayout() {
 
     if (isSignedIn) {
       // If the user is signed in but in the onboarding flow, let them complete it
-      if (!inOnboarding && !inTabsGroup) {
+      if (!inOnboarding && !inTabsGroup && !inAuthGroup) {
         // Otherwise, send them to the main app
         router.replace('/(tabs)');
       }
@@ -59,7 +62,7 @@ function InitialLayout() {
         router.replace('/');
       }
     }
-  }, [isSignedIn, segments, isLoaded]);
+  }, [isSignedIn, segments, isLoaded, router]);
 
   return (
     <Stack screenOptions={{ headerShown: false, animation: 'slide_from_right' }}>
@@ -74,15 +77,15 @@ function InitialLayout() {
 }
 
 export default function RootLayout() {
+  // Framework ready hook must be called unconditionally before any other hooks
+  useFrameworkReady();
+
   const [fontsLoaded, fontError] = useFonts({
     Inter_400Regular,
     Inter_500Medium,
     Inter_600SemiBold,
     Inter_700Bold,
   });
-
-  // Framework ready hook must be called unconditionally
-  useFrameworkReady();
 
   useEffect(() => {
     if (fontsLoaded || fontError) {
@@ -94,9 +97,15 @@ export default function RootLayout() {
     return null;
   }
 
+  const publishableKey = process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY;
+  
+  if (!publishableKey) {
+    throw new Error("Missing Clerk publishable key");
+  }
+
   return (
     <ClerkProvider
-      publishableKey={process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY!}
+      publishableKey={publishableKey}
       tokenCache={tokenCache}
     >
       <InitialLayout />
