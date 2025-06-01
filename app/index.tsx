@@ -25,7 +25,10 @@ export default function WelcomeScreen() {
   const buttonOpacity = useSharedValue(0);
   const loginOpacity = useSharedValue(0);
 
-  useFrameworkReady();
+  // Only call useFrameworkReady on web platform
+  if (Platform.OS === 'web') {
+    useFrameworkReady();
+  }
 
   const [fontsLoaded] = useFonts({
     InterRegular: Inter_400Regular,

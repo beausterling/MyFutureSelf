@@ -71,7 +71,10 @@ function InitialLayout() {
 }
 
 export default function RootLayout() {
-  useFrameworkReady();
+  // Only call useFrameworkReady on web platform
+  if (Platform.OS === 'web') {
+    useFrameworkReady();
+  }
 
   const [fontsLoaded, fontError] = useFonts({
     Inter_400Regular,
