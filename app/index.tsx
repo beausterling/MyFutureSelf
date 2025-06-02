@@ -1,6 +1,5 @@
 import React, { useEffect } from 'react';
 import { StyleSheet, Text, View, Pressable, Platform } from 'react-native';
-import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
 import * as Haptics from 'expo-haptics';
 import { StatusBar } from 'expo-status-bar';
@@ -27,6 +26,28 @@ export default function WelcomeScreen() {
     buttonOpacity.value = withDelay(900, withSpring(1, { damping: 20 }));
     loginOpacity.value = withDelay(1200, withSpring(1, { damping: 20 }));
   }, []);
+
+  const animatedTextStyle = useAnimatedStyle(() => ({
+    opacity: textOpacity.value,
+    transform: [{ translateY: withSpring(textOpacity.value * 0 + (1 - textOpacity.value) * 20) }]
+  }));
+
+  const animatedSubTextStyle = useAnimatedStyle(() => ({
+    opacity: subTextOpacity.value,
+    transform: [{ translateY: withSpring(subTextOpacity.value * 0 + (1 - subTextOpacity.value) * 20) }]
+  }));
+
+  const animatedButtonStyle = useAnimatedStyle(() => ({
+    opacity: buttonOpacity.value,
+    transform: [
+      { scale: buttonScale.value },
+      { translateY: withSpring(buttonOpacity.value * 0 + (1 - buttonOpacity.value) * 20) }
+    ]
+  }));
+
+  const animatedLoginStyle = useAnimatedStyle(() => ({
+    opacity: loginOpacity.value,
+  }));
 
   const handlePress = () => {
     if (Platform.OS !== 'web') {
