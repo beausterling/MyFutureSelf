@@ -4,7 +4,6 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
 import * as Haptics from 'expo-haptics';
 import { StatusBar } from 'expo-status-bar';
-import { useSignUp, useAuth } from '@clerk/clerk-expo';
 import Animated, { 
   useSharedValue, 
   useAnimatedStyle,
@@ -12,26 +11,14 @@ import Animated, {
   withSequence,
   withDelay 
 } from 'react-native-reanimated';
-import { useFonts, Inter_400Regular, Inter_600SemiBold, Inter_700Bold } from '@expo-google-fonts/inter';
-import { useFrameworkReady } from '@/hooks/useFrameworkReady';
 
 export default function WelcomeScreen() {
   const router = useRouter();
-  const { isSignedIn } = useAuth();
-  const { signUp, setActive } = useSignUp();
   const buttonScale = useSharedValue(1);
   const textOpacity = useSharedValue(0);
   const subTextOpacity = useSharedValue(0);
   const buttonOpacity = useSharedValue(0);
   const loginOpacity = useSharedValue(0);
-
-  useFrameworkReady();
-
-  const [fontsLoaded] = useFonts({
-    InterRegular: Inter_400Regular,
-    InterSemiBold: Inter_600SemiBold,
-    InterBold: Inter_700Bold,
-  });
 
   useEffect(() => {
     // Animate elements in sequence
@@ -41,35 +28,7 @@ export default function WelcomeScreen() {
     loginOpacity.value = withDelay(1200, withSpring(1, { damping: 20 }));
   }, []);
 
-  useEffect(() => {
-    if (isSignedIn) {
-      router.replace('/(tabs)');
-    }
-  }, [isSignedIn]);
-
-  const animatedTextStyle = useAnimatedStyle(() => ({
-    opacity: textOpacity.value,
-    transform: [{ translateY: withSpring(textOpacity.value * 0 + (1 - textOpacity.value) * 20) }]
-  }));
-
-  const animatedSubTextStyle = useAnimatedStyle(() => ({
-    opacity: subTextOpacity.value,
-    transform: [{ translateY: withSpring(subTextOpacity.value * 0 + (1 - subTextOpacity.value) * 20) }]
-  }));
-
-  const animatedButtonStyle = useAnimatedStyle(() => ({
-    opacity: buttonOpacity.value,
-    transform: [
-      { scale: buttonScale.value },
-      { translateY: withSpring(buttonOpacity.value * 0 + (1 - buttonOpacity.value) * 20) }
-    ]
-  }));
-
-  const animatedLoginStyle = useAnimatedStyle(() => ({
-    opacity: loginOpacity.value,
-  }));
-
-  const handlePress = async () => {
+  const handlePress = () => {
     if (Platform.OS !== 'web') {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     }
@@ -80,21 +39,8 @@ export default function WelcomeScreen() {
       withDelay(100, withSpring(1, { damping: 15, stiffness: 300 }))
     );
     
-    try {
-      // Create a new user with a placeholder email (we'll update this later)
-      const result = await signUp.create({
-        emailAddress: `user-${Date.now()}@example.com`,
-        password: `temp-${Date.now()}`,
-      });
-
-      // Set the newly created user as active
-      await setActive({ session: result.createdSessionId });
-      
-      // Navigate to onboarding
-      router.push('/onboarding/verify-phone');
-    } catch (err) {
-      console.error('Error signing up:', err);
-    }
+    // Navigate to onboarding
+    router.push('/onboarding/verify-phone');
   };
 
   const handleLoginPress = () => {
@@ -103,10 +49,6 @@ export default function WelcomeScreen() {
     }
     // Navigate to sign in screen (to be implemented)
   };
-
-  if (!fontsLoaded) {
-    return null;
-  }
 
   return (
     <View style={styles.container}>
@@ -168,7 +110,7 @@ const styles = StyleSheet.create({
     marginBottom: 64,
   },
   title: {
-    fontFamily: 'InterBold',
+    fontFamily: 'Inter_700Bold',
     fontSize: 32,
     fontWeight: '700',
     color: '#FFFFFF',
@@ -176,7 +118,7 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   subtitle: {
-    fontFamily: 'InterRegular',
+    fontFamily: 'Inter_400Regular',
     fontSize: 18,
     color: 'rgba(255, 255, 255, 0.7)',
     textAlign: 'center',
@@ -200,7 +142,7 @@ const styles = StyleSheet.create({
     elevation: 4,
   },
   buttonText: {
-    fontFamily: 'InterSemiBold',
+    fontFamily: 'Inter_600SemiBold',
     fontSize: 18,
     color: '#1A3A5F',
     fontWeight: '600',
@@ -210,7 +152,7 @@ const styles = StyleSheet.create({
     bottom: 40,
   },
   loginText: {
-    fontFamily: 'InterRegular',
+    fontFamily: 'Inter_400Regular',
     fontSize: 16,
     color: '#FFFFFF',
     textDecorationLine: 'underline',
